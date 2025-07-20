@@ -230,7 +230,7 @@ pll_mist pll(
 `include "build_id.v" 
 localparam CONF_STR = {
     "ikacore_Psychic5;",
-    `SEP
+    // `SEP
 	"O2,Rotate Controls,Off,On;",
     "P1,Video Settings;",
     //"P1-;",
@@ -283,7 +283,6 @@ wire        i2c_end;
 `endif
 
 // wire [6:0] core_mod;
-
 wire        rotate    = status[2];
 wire  [1:0] scanlines = status[4:3];
 wire        blend     = status[5];
@@ -373,13 +372,12 @@ user_io(
 	);
 
 wire        ioctl_downl;
-wire  [7:0] ioctl_index;
+wire [7:0]  ioctl_index;
 wire        ioctl_wr;
 wire [26:0] ioctl_addr;
-wire  [7:0] ioctl_dout;
+wire [7:0]  ioctl_dout;
 
 wire        ioctl_wait;     /////////// TODO
-assign ioctl_wait = 1'b0;
 
 data_io #(.ROM_DIRECT_UPLOAD(DIRECT_UPLOAD)) data_io(
 	.clk_sys       ( CLK60M       ),
@@ -419,8 +417,8 @@ wire    [3:0]   video_r, video_g, video_b; //need to use color conversion LUT
 
 wire    [15:0]  sound;
 wire            pxcen;
-//wire            master_reset = status[0] | buttons[1];
-wire            master_reset = 1'b0;      // TODO
+// wire            master_reset = status[0] | buttons[1];
+wire            master_reset = status[0] | buttons[1] | !pll_locked ;
 
 wire            flip = status[23];
 wire    [1:0]   pxcntr_adjust_mode = status[13:12];
@@ -433,8 +431,8 @@ wire    [3:0]   vpos_adjust = status[28:25];
 
 Psychic5_emu gameboard_top (
     .i_EMU_MCLK                 (CLK60M                     ),
-    .i_EMU_INITRST              (1'b0                       ),  // ??
-    .i_EMU_SOFTRST              (master_reset               ),
+    .i_EMU_INITRST              (1'b0                       ),  	// RESET
+    .i_EMU_SOFTRST              (status[0]                  ),		// master_reset
 
     .o_HSYNC_n                  (hsync_n                    ),
     .o_VSYNC_n                  (vsync_n                    ),
