@@ -16,7 +16,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-`include "rtl/Psychic5_emu_header.v"
+//`include "rtl/Psychic5_emu_header.v"
 
 module Psychic5_sound
 (

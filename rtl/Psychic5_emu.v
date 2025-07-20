@@ -17,7 +17,7 @@
 */
 
 `timescale 10ns/10ns
-`include "rtl/Psychic5_emu_header.v"
+//`include "rtl/Psychic5_emu_header.v"
 
 module Psychic5_emu
 (
@@ -633,8 +633,9 @@ wire            cpu_soft_reset = i_EMU_INITRST | i_EMU_SOFTRST;
 
 
 //screen simulation
-`ifdef SIMULATION
 wire    [8:0]   HCOUNTER, VCOUNTER;
+
+`ifdef SIMULATION
 
 Psychic5_screensim screensim_main (
     .i_EMU_MCLK                 (i_EMU_MCLK                 ),
