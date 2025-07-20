@@ -135,9 +135,14 @@ assign spi_do_int = SPI_SS4 ? 1'bz : SD_MISO;
 assign SPI_DO = spi_do_int;
 
 // JAMMA interface
+reg joy_select = 1'b1;
+always @(posedge XJOY_LOAD) begin
+	joy_select <= ~joy_select | ~XJOY_CLK;
+end
 assign JOY_CLK    = XJOY_CLK;
 assign JOY_LOAD   = XJOY_LOAD;
 assign XJOY_DATA  = JOY_DATA;
+assign JOY_SELECT = joy_select;
 `endif
 
 `ifdef NO_DIRECT_UPLOAD
@@ -218,46 +223,42 @@ pll_mist pll(
 //             Upper                             Lower              
 // 0         1         2         3          4         5         6   
 // 01234567890123456789012345678901 23456789012345678901234567890123
-// 0123456789ABCDEFGHIJKLMNOPQRSTUV 0123456789ABCDEFGHIJKLMNOPQRSTUV
-// X  XXX XX X XX XX  XXX X XXXX
+// 0123456789ABCDEFGHIJKLMNOPQRSTUV WXYZabcdefghijklmnopqrstuvwxyz
+// X xXXXxXX X XX XX  XXX X XXXX    xxx
 
 
 `include "build_id.v" 
 localparam CONF_STR = {
     "ikacore_Psychic5;",
     `SEP
-    "P1,Scaler Settings;",
+	"O2,Rotate Controls,Off,On;",
+    "P1,Video Settings;",
     //"P1-;",
-    "P1O7,Aspect ratio,original,full screen;",
-    "P1O8,Orientation,vertical,horizontal;",
-    "P1OA,VGA Scaler,off,on;",
-    "P1O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
-    `SEP
-    "ON,Flip,normal,flip;",
-    "OCD,Refresh rate,original,NTSC-friendly,custom;",
-
-    // "h0OFG,H refresh rate adj,0,2,4,6;",
-    // "h0OJL,V refresh rate adj,0,1,2,3,4,5,6,7;",
-	
-    "OPS,V position,original,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7;",
+    // "P1O7,Aspect ratio,original,full screen;",
+    // "P1O8,Orientation,vertical,horizontal;",
+    // "P1OA,VGA Scaler,off,on;",
+`ifdef DUAL_SDRAM
+	"P1OWX,Orientation,Vertical,Clockwise,Anticlockwise;",
+	"P1OY,Rotation filter,Off,On;",
+`endif		
+	"P1O34,Scanlines,Off,25%,50%,75%;",
+	"P1O5,Blending,Off,On;",
+    "P1ON,Flip,normal,flip;",
+    "P1OCD,Refresh rate,original,NTSC-friendly,custom;",
+    "P1OFG,H refresh rate adj,0,2,4,6;",
+    "P1OJL,V refresh rate adj,0,1,2,3,4,5,6,7;",
+    "P1OPS,V position,original,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7;",	
+	`SEP
+	"O6,Joystick Swap,Off,On;",
     `SEP
     "DIP;",
     `SEP
     "R0,Reset and close OSD;",
-
     // "J1,Attack,Jump,Test,Service,Coin,Start;",
     // "jn,A,B,Start,Select,R,L;",
-
     "V,v",`BUILD_DATE 
 };
 
-//ioctl
-// wire    [15:0]  ioctl_index;
-// wire            ioctl_download;
-// wire    [26:0]  ioctl_addr;
-// wire    [7:0]   ioctl_data;
-// wire            ioctl_wr;
-// wire            ioctl_wait;
 
 wire    [63:0]  status; //status bits
 wire    [1:0]   buttons; //hardware button
@@ -281,7 +282,15 @@ wire        i2c_ack;
 wire        i2c_end;
 `endif
 
-wire [6:0] core_mod;
+// wire [6:0] core_mod;
+
+wire        rotate    = status[2];
+wire  [1:0] scanlines = status[4:3];
+wire        blend     = status[5];
+wire        joyswap   = status[6];
+wire  [1:0] rotate_screen = status[33:32];
+wire        rotate_filter = status[34];
+reg   [1:0] orientation;
 
 
 // wire            forced_scandoubler; //?
@@ -354,7 +363,7 @@ user_io(
 	.i2c_ack        (i2c_ack        ),
 	.i2c_end        (i2c_end        ),
 `endif
-	// .core_mod       (core_mod       ),
+ // .core_mod       (core_mod       ),
 	.key_strobe     (key_strobe     ),
 	.key_pressed    (key_pressed    ),
 	.key_code       (key_code       ),
@@ -370,7 +379,7 @@ wire [26:0] ioctl_addr;
 wire  [7:0] ioctl_dout;
 
 wire        ioctl_wait;     /////////// TODO
-
+assign ioctl_wait = 1'b0;
 
 data_io #(.ROM_DIRECT_UPLOAD(DIRECT_UPLOAD)) data_io(
 	.clk_sys       ( CLK60M       ),
@@ -410,7 +419,8 @@ wire    [3:0]   video_r, video_g, video_b; //need to use color conversion LUT
 
 wire    [15:0]  sound;
 wire            pxcen;
-wire            master_reset = status[0] | buttons[1];
+//wire            master_reset = status[0] | buttons[1];
+wire            master_reset = 1'b0;      // TODO
 
 wire            flip = status[23];
 wire    [1:0]   pxcntr_adjust_mode = status[13:12];
@@ -423,8 +433,8 @@ wire    [3:0]   vpos_adjust = status[28:25];
 
 Psychic5_emu gameboard_top (
     .i_EMU_MCLK                 (CLK60M                     ),
-    .i_EMU_INITRST              (master_reset               ),
-    .i_EMU_SOFTRST              (buttons[1] | status[0]     ),
+    .i_EMU_INITRST              (1'b0                       ),  // ??
+    .i_EMU_SOFTRST              (master_reset               ),
 
     .o_HSYNC_n                  (hsync_n                    ),
     .o_VSYNC_n                  (vsync_n                    ),
@@ -562,14 +572,15 @@ mist_dual_video #(.COLOR_DEPTH(5),.SD_HCNT_WIDTH(10), .OUT_COLOR_DEPTH(VGA_BITS)
 // 	.SDRAM_BA       ( SDRAM2_BA        ),
 // `endif
 	.no_csync(no_csync),
-	// .rotate({orientation[1],rotate}),
-	// .rotate_screen  ( rotate_screen    ),
-	// .rotate_hfilter ( rotate_filter    ),
-	// .rotate_vfilter ( rotate_filter    ),
-	.ce_divider(4'd11), // pix clock = 60/12
-	// .blend(blend),
+	.rotate({orientation[1],rotate}),
+	.rotate_screen  ( rotate_screen    ),
+	.rotate_hfilter ( rotate_filter    ),
+	.rotate_vfilter ( rotate_filter    ),
+	.ce_divider(4'd9), // pix clock = 60/10
+	.blend(blend),
 	.scandoubler_disable(scandoublerD),
-	// .scanlines(scanlines),
+	// scanlines (00-none 01-25% 10-50% 11-75%)   	//only works if scandoubler enabled
+	.scanlines(scanlines),
 	.ypbpr(ypbpr)
 	);
 
@@ -640,26 +651,26 @@ spdif spdif (
 `endif
 
 // Common inputs
-// wire m_up1, m_down1, m_left1, m_right1, m_up1B, m_down1B, m_left1B, m_right1B;
-// wire m_up2, m_down2, m_left2, m_right2, m_up2B, m_down2B, m_left2B, m_right2B;
-// wire m_tilt, m_coin1, m_coin2, m_coin3, m_coin4, m_one_player, m_two_players, m_three_players, m_four_players;
-// wire [11:0] m_fire1, m_fire2;
+wire m_up1, m_down1, m_left1, m_right1, m_up1B, m_down1B, m_left1B, m_right1B;
+wire m_up2, m_down2, m_left2, m_right2, m_up2B, m_down2B, m_left2B, m_right2B;
+wire m_tilt, m_coin1, m_coin2, m_coin3, m_coin4, m_one_player, m_two_players, m_three_players, m_four_players;
+wire [11:0] m_fire1, m_fire2;
 
-// arcade_inputs #(.START1(10), .START2(12), .COIN1(11)) inputs (
-// 	.clk         ( CLK60M      ),
-// 	.key_strobe  ( key_strobe  ),
-// 	.key_pressed ( key_pressed ),
-// 	.key_code    ( key_code    ),
-// 	.joystick_0  ( joystick_0  ),
-// 	.joystick_1  ( joystick_1  ),
-// 	.rotate      ( rotate      ),
-// 	.orientation ( orientation ^ {1'b0, |rotate_screen} ),
-// 	.joyswap     ( joyswap     ),
-// 	.oneplayer   ( 1'b0        ),
-// 	.controls    ( {m_tilt, m_coin4, m_coin3, m_coin2, m_coin1, m_four_players, m_three_players, m_two_players, m_one_player} ),
-// 	.player1     ( {m_up1B, m_down1B, m_left1B, m_right1B, m_fire1, m_up1, m_down1, m_left1, m_right1} ),
-// 	.player2     ( {m_up2B, m_down2B, m_left2B, m_right2B, m_fire2, m_up2, m_down2, m_left2, m_right2} )
-// );
+arcade_inputs #(.START1(10), .START2(12), .COIN1(11)) inputs (
+	.clk         ( CLK60M      ),
+	.key_strobe  ( key_strobe  ),
+	.key_pressed ( key_pressed ),
+	.key_code    ( key_code    ),
+	.joystick_0  ( joystick_0  ),
+	.joystick_1  ( joystick_1  ),
+	.rotate      ( rotate      ),
+	.orientation ( orientation ^ {1'b0, |rotate_screen} ),
+	.joyswap     ( joyswap     ),
+	.oneplayer   ( 1'b0        ),
+	.controls    ( {m_tilt, m_coin4, m_coin3, m_coin2, m_coin1, m_four_players, m_three_players, m_two_players, m_one_player} ),
+	.player1     ( {m_up1B, m_down1B, m_left1B, m_right1B, m_fire1, m_up1, m_down1, m_left1, m_right1} ),
+	.player2     ( {m_up2B, m_down2B, m_left2B, m_right2B, m_fire2, m_up2, m_down2, m_left2, m_right2} )
+);
 
 endmodule
 
