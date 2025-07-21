@@ -24,6 +24,7 @@ module Arcade_Psychic5_MiST
 `endif
 
 	output        LED,
+	output        LED1,
 	output [VGA_BITS-1:0] VGA_R,
 	output [VGA_BITS-1:0] VGA_G,
 	output [VGA_BITS-1:0] VGA_B,
@@ -127,6 +128,7 @@ module Arcade_Psychic5_MiST
 	output        UART_TX
 );
 
+assign LED1 =  ~ioctl_downl;
 
 `ifdef NEPTUNOPLUS
 // SD card  (driven by middleboard)
@@ -229,8 +231,9 @@ pll_mist pll(
 
 `include "build_id.v" 
 localparam CONF_STR = {
-    "ikacore_Psychic5;",
-    // `SEP
+    "ikacore_Psychic5;;",
+    `SEP
+	"F,ROMARC,Load ROM/ARC;",
 	"O2,Rotate Controls,Off,On;",
     "P1,Video Settings;",
     //"P1-;",
