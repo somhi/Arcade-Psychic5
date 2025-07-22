@@ -38,24 +38,14 @@ generate
     begin
         always @(posedge i_MCLK) //read
         begin
-            if(i_CS_n == 1'b0)
-            begin
-                if(i_RD_n == 1'b0)
-                begin
-                    o_DOUT <= RAM[i_ADDR];
-                end
-            end
+            if(i_CS_n == 1'b0 && i_RD_n == 1'b0)
+                o_DOUT <= RAM[i_ADDR];
         end
 
         always @(posedge i_MCLK)
         begin
-            if(i_CS_n == 1'b0)
-            begin
-                if(i_WR_n == 1'b0)
-                begin
-                    RAM[i_ADDR] <= i_DIN;
-                end
-            end
+            if(i_CS_n == 1'b0 && i_WR_n == 1'b0)
+                RAM[i_ADDR] <= i_DIN;
         end
     end
 
@@ -63,24 +53,14 @@ generate
     begin
         always @(negedge i_MCLK) //read
         begin
-            if(i_CS_n == 1'b0)
-            begin
-                if(i_RD_n == 1'b0)
-                begin
-                    o_DOUT <= RAM[i_ADDR];
-                end
-            end
+            if(i_CS_n == 1'b0 && i_RD_n == 1'b0)
+                o_DOUT <= RAM[i_ADDR];
         end
 
         always @(negedge i_MCLK)
         begin
-            if(i_CS_n == 1'b0)
-            begin
-                if(i_WR_n == 1'b0)
-                begin
-                    RAM[i_ADDR] <= i_DIN;
-                end
-            end
+            if(i_CS_n == 1'b0 && i_WR_n == 1'b0)
+                RAM[i_ADDR] <= i_DIN;
         end
     end
 endgenerate

@@ -294,7 +294,6 @@ set_global_assignment -name AUTO_MERGE_PLLS OFF
 
 set_global_assignment -name VERILOG_FILE build_id.v
 set_global_assignment -name VERILOG_FILE pll_mist.v
-set_global_assignment -name VERILOG_FILE ../SRAM.v
 set_global_assignment -name QIP_FILE "../mist-modules/mist.qip"
 
 set_global_assignment -name SDC_FILE "Arcade-Psychic5.sdc"
@@ -309,7 +308,7 @@ set_global_assignment -name VERILOG_FILE ../../rtl/Psychic5_component/hybrid/M67
 set_global_assignment -name VERILOG_FILE ../../rtl/Psychic5_component/hybrid/M67673.v
 set_global_assignment -name VERILOG_FILE ../../rtl/Psychic5_component/hybrid/N8633S.v
 set_global_assignment -name VERILOG_FILE ../../rtl/Psychic5_component/hybrid/N8633V.v
-# set_global_assignment -name VERILOG_FILE ../../rtl/Psychic5_component/ram/SRAM.v
+set_global_assignment -name VERILOG_FILE ../../rtl/Psychic5_component/ram/SRAM.v
 set_global_assignment -name VERILOG_FILE ../../rtl/Psychic5_component/rom/PROM.v
 set_global_assignment -name VERILOG_FILE ../../rtl/Psychic5_cpuboard/Psychic5_sound.v
 set_global_assignment -name VERILOG_FILE ../../rtl/Psychic5_cpuboard/Psychic5_cpuboard.v
