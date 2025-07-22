@@ -24,7 +24,10 @@ module Arcade_Psychic5_MiST
 `endif
 
 	output        LED,
+`ifdef NEPTUNOPLUS
+	input		  KEY0,
 	output        LED1,
+`endif
 	output [VGA_BITS-1:0] VGA_R,
 	output [VGA_BITS-1:0] VGA_G,
 	output [VGA_BITS-1:0] VGA_B,
@@ -128,13 +131,16 @@ module Arcade_Psychic5_MiST
 	output        UART_TX
 );
 
-assign LED1 =  ~ioctl_downl;
-
 `ifdef NEPTUNOPLUS
 // SD card  (driven by middleboard)
 wire   spi_do_int;
 assign spi_do_int = SPI_SS4 ? 1'bz : SD_MISO;
 assign SPI_DO = spi_do_int;
+
+assign LED1 =  ~ioctl_downl;
+
+wire   debug;
+assign LED = ~debug;
 
 // JAMMA interface
 reg joy_select = 1'b1;
@@ -294,7 +300,6 @@ wire  [1:0] rotate_screen = status[33:32];
 wire        rotate_filter = status[34];
 reg   [1:0] orientation;
 
-
 // wire            forced_scandoubler; //?
 // wire    [21:0]  gamma_bus;
 
@@ -421,7 +426,7 @@ wire    [3:0]   video_r, video_g, video_b; //need to use color conversion LUT
 wire    [15:0]  sound;
 wire            pxcen;
 // wire            master_reset = status[0] | buttons[1];
-wire            master_reset = status[0] | buttons[1] | !pll_locked ;
+wire            master_reset = status[0] | buttons[1] | !KEY0 | !pll_locked ;
 
 wire            flip = status[23];
 wire    [1:0]   pxcntr_adjust_mode = status[13:12];
@@ -435,7 +440,7 @@ wire    [3:0]   vpos_adjust = status[28:25];
 Psychic5_emu gameboard_top (
     .i_EMU_MCLK                 (CLK60M                     ),
     .i_EMU_INITRST              (1'b0                       ),  	// RESET
-    .i_EMU_SOFTRST              (status[0]                  ),		// master_reset
+    .i_EMU_SOFTRST              (master_reset               ),		// master_reset
 
     .o_HSYNC_n                  (hsync_n                    ),
     .o_VSYNC_n                  (vsync_n                    ),
@@ -477,7 +482,12 @@ Psychic5_emu gameboard_top (
     .sdram_ncs                  (SDRAM_nCS                  ),
     .sdram_cke                  (SDRAM_CKE                  ),
 
+`ifdef NEPTUNOPLUS
+    .debug                      (debug                      )
+`else
     .debug                      (LED                        )
+`endif		
+
 );
 
 
