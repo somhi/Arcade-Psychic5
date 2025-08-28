@@ -47,52 +47,50 @@ set_global_assignment -name SMART_RECOMPILE ON
 
 # Pin & Location Assignments
 # ==========================
-set_location_assignment PIN_A24 -to LED
-set_location_assignment PIN_A25 -to LED1
-set_location_assignment PIN_AD23 -to KEY0
 set_location_assignment PIN_B14 -to CLOCK_27
 
-set_location_assignment PIN_AE19 -to VGA_R[7]
-set_location_assignment PIN_AD19 -to VGA_R[6]
-set_location_assignment PIN_AC19 -to VGA_R[5]
-set_location_assignment PIN_AF18 -to VGA_R[4]
-set_location_assignment PIN_AE18 -to VGA_R[3]
-set_location_assignment PIN_AC18 -to VGA_R[2]
-set_location_assignment PIN_AD16 -to VGA_R[1]
-set_location_assignment PIN_AE15 -to VGA_R[0]
-set_location_assignment PIN_AF24 -to VGA_B[7]
-set_location_assignment PIN_AC21 -to VGA_B[6]
-set_location_assignment PIN_AE23 -to VGA_B[5]
-set_location_assignment PIN_AE22 -to VGA_B[4]
-set_location_assignment PIN_AD20 -to VGA_B[3]
-set_location_assignment PIN_AF20 -to VGA_B[2]
-set_location_assignment PIN_AF15 -to VGA_B[1]
-set_location_assignment PIN_AC16 -to VGA_B[0]
-set_location_assignment PIN_AD21 -to VGA_G[7]
-set_location_assignment PIN_AF23 -to VGA_G[6]
-set_location_assignment PIN_AF22 -to VGA_G[5]
-set_location_assignment PIN_AE21 -to VGA_G[4]
-set_location_assignment PIN_AF21 -to VGA_G[3]
-set_location_assignment PIN_AF19 -to VGA_G[2]
-set_location_assignment PIN_AD17 -to VGA_G[1]
-set_location_assignment PIN_AF16 -to VGA_G[0]
-set_location_assignment PIN_AD18 -to VGA_VS
-set_location_assignment PIN_AE17 -to VGA_HS
+set_location_assignment PIN_A23 -to LED
+set_location_assignment PIN_A25 -to LED1
+set_location_assignment PIN_A24 -to LED2
+set_location_assignment PIN_AD23 -to KEY0
+set_location_assignment PIN_AD24 -to KEY1
 
-# mist - miso / mosi
-set_location_assignment PIN_AC14 -to SPI_DO
-set_location_assignment PIN_AF12 -to SPI_DI
-set_location_assignment PIN_AF11 -to SPI_SCK
-set_location_assignment PIN_AC10 -to SPI_SS2
-set_location_assignment PIN_AD10 -to SPI_SS3
-set_location_assignment PIN_AE9 -to SPI_SS4
-set_location_assignment PIN_AD14 -to CONF_DATA0
+# ========VIDEO===========  
+set_location_assignment PIN_AF21 -to VGA_R[5]
+set_location_assignment PIN_AF23 -to VGA_R[4]
+set_location_assignment PIN_AE23 -to VGA_R[3]
+set_location_assignment PIN_AF20 -to VGA_R[2]
+set_location_assignment PIN_AF19 -to VGA_R[1]
+set_location_assignment PIN_AC19 -to VGA_R[0]
+set_location_assignment PIN_AF22 -to VGA_B[5]
+set_location_assignment PIN_AF25 -to VGA_B[4]
+set_location_assignment PIN_AF24 -to VGA_B[3]
+set_location_assignment PIN_AE22 -to VGA_B[2]
+set_location_assignment PIN_AD19 -to VGA_B[1]
+set_location_assignment PIN_AE18 -to VGA_B[0]
+set_location_assignment PIN_AE21 -to VGA_G[5]
+set_location_assignment PIN_AD21 -to VGA_G[4]
+set_location_assignment PIN_AC21 -to VGA_G[3]
+set_location_assignment PIN_AD20 -to VGA_G[2]
+set_location_assignment PIN_AE19 -to VGA_G[1]
+set_location_assignment PIN_AF18 -to VGA_G[0]
+set_location_assignment PIN_AC18 -to VGA_VS
+set_location_assignment PIN_AD18 -to VGA_HS
 
-# UART
-# set_location_assignment PIN_AF4 -to UART_TX
-# set_location_assignment PIN_AE5 -to UART_RX
+# ==========MCU=============  
+set_location_assignment PIN_D6 -to CONF_DATA0
+set_location_assignment PIN_B22 -to SPI_DI
+set_location_assignment PIN_B23 -to SPI_DO
+set_location_assignment PIN_C21 -to SPI_SCK
+set_location_assignment PIN_C10 -to SPI_SS2
+set_location_assignment PIN_B9 -to SPI_SS3
+set_location_assignment PIN_B21 -to SPI_SS4
 
-# SDRAM
+# =========UART=============  
+set_location_assignment PIN_B2 -to UART_TX
+set_location_assignment PIN_C5 -to UART_RX
+
+# ==========SDRAM=============
 set_location_assignment PIN_L25 -to SDRAM_A[0]
 set_location_assignment PIN_L26 -to SDRAM_A[1]
 set_location_assignment PIN_M25 -to SDRAM_A[2]
@@ -133,33 +131,13 @@ set_location_assignment PIN_H26 -to SDRAM_nCS
 set_location_assignment PIN_K24 -to SDRAM_CKE
 set_location_assignment PIN_E22 -to SDRAM_CLK
 
-# deltasigma DAC
-set_location_assignment PIN_AF17 -to AUDIO_L
-set_location_assignment PIN_AC17 -to AUDIO_R
-# I2S DAC
-set_location_assignment PIN_AC15 -to I2S_BCK
-set_location_assignment PIN_AE14 -to I2S_DATA
-set_location_assignment PIN_AD15 -to I2S_LRCK
-# Audio In
-set_location_assignment PIN_C21 -to AUDIO_IN
-
-# joysticks in
-set_location_assignment PIN_AD4 -to JOY_CLK
-set_location_assignment PIN_AC4 -to JOY_LOAD
-set_location_assignment PIN_AD3 -to JOY_DATA
-set_location_assignment PIN_A19 -to JOY_SELECT
-
-# joysticks from mb
-set_location_assignment PIN_AF4 -to XJOY_CLK
-set_location_assignment PIN_AE3 -to XJOY_LOAD
-set_location_assignment PIN_AF5 -to XJOY_DATA
-
-# sd card
-set_location_assignment PIN_A4 -to SD_MISO
-set_location_assignment PIN_C4 -to SD_MOSI
-set_location_assignment PIN_B4 -to SD_SCK
-set_location_assignment PIN_C5 -to SD_CS
-
+# ==========AUDIO============  
+set_location_assignment PIN_AD17 -to I2S_LRCK
+set_location_assignment PIN_AF17 -to I2S_BCK
+set_location_assignment PIN_AE17 -to I2S_DATA
+#set_location_assignment PIN_ -to AUDIO_L
+#set_location_assignment PIN_ -to AUDIO_R
+set_location_assignment PIN_AC17 -to AUDIO_IN
 
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to SDRAM_DQ[*]
 set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to SDRAM_A[*]
@@ -194,8 +172,8 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to VGA_G[*
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to VGA_B[*]
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to VGA_HS
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to VGA_VS
-set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to AUDIO_L
-set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to AUDIO_R
+# set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to AUDIO_L
+# set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to AUDIO_R
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to SPI_DO
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to LED
 
@@ -283,12 +261,12 @@ set_global_assignment -name VERILOG_MACRO "I2S_AUDIO=1"
 set_global_assignment -name VERILOG_MACRO "I2S_AUDIO_HDMI=0"
 set_global_assignment -name VERILOG_MACRO "SPDIF_AUDIO=0"
 set_global_assignment -name VERILOG_MACRO "USE_AUDIO_IN=1"
-set_global_assignment -name VERILOG_MACRO "VGA_8BIT=1"
+set_global_assignment -name VERILOG_MACRO "VGA_8BIT=0"
 set_global_assignment -name VERILOG_MACRO "USE_CLOCK_50=0"
 set_global_assignment -name VERILOG_MACRO "BIG_OSD=1"
 set_global_assignment -name VERILOG_MACRO "USE_HDMI=0"
 
-set_global_assignment -name VERILOG_MACRO "NEPTUNOPLUS=1"
+set_global_assignment -name VERILOG_MACRO "POSEIDON=1"
 set_global_assignment -name VERILOG_MACRO "GX150=1"
 
 set_global_assignment -name DSP_BLOCK_BALANCING "DSP BLOCKS"

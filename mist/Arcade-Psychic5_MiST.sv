@@ -24,7 +24,7 @@ module Arcade_Psychic5_MiST
 `endif
 
 	output        LED,
-`ifdef NEPTUNOPLUS
+`ifdef GX150
 	input		  KEY0,
 	output        LED1,
 `endif
@@ -90,8 +90,10 @@ module Arcade_Psychic5_MiST
 	output        SDRAM2_CKE,
 `endif
 
+`ifndef POSEIDON
 	output        AUDIO_L,
 	output        AUDIO_R,
+`endif
 `ifdef I2S_AUDIO
 	output        I2S_BCK,
 	output        I2S_LRCK,
@@ -131,16 +133,18 @@ module Arcade_Psychic5_MiST
 	output        UART_TX
 );
 
+
+`ifdef GX150
+wire   debug;
+assign LED = ~debug;
+assign LED1 =  ~ioctl_downl;
+`endif
+
 `ifdef NEPTUNOPLUS
 // SD card  (driven by middleboard)
 wire   spi_do_int;
 assign spi_do_int = SPI_SS4 ? 1'bz : SD_MISO;
 assign SPI_DO = spi_do_int;
-
-assign LED1 =  ~ioctl_downl;
-
-wire   debug;
-assign LED = ~debug;
 
 // JAMMA interface
 reg joy_select = 1'b1;
@@ -218,10 +222,15 @@ pll_mist pll(
     .inclk0                     (CLOCK_27                   ),
     .areset                     (1'b0                       ),
     .c0                         (CLK60M                     ),
+// `ifndef POSEIDON
     .c1                         (SDRAM_CLK                  ),
+// `endif
     .locked                     (pll_locked                 )
 );
 
+// `ifdef POSEIDON
+// assign SDRAM_CLK = ~CLK60M;
+// `endif
 
 //
 ///////////////////////   MiST FRAMEWORK   ///////////////////////
@@ -244,11 +253,12 @@ localparam CONF_STR = {
     "P1,Video Settings;",
     //"P1-;",
     // "P1O7,Aspect ratio,original,full screen;",
-    // "P1O8,Orientation,vertical,horizontal;",
     // "P1OA,VGA Scaler,off,on;",
 `ifdef DUAL_SDRAM
 	"P1OWX,Orientation,Vertical,Clockwise,Anticlockwise;",
 	"P1OY,Rotation filter,Off,On;",
+// `else
+//     "P1O8,Orientation,vertical,horizontal;",
 `endif		
 	"P1O34,Scanlines,Off,25%,50%,75%;",
 	"P1O5,Blending,Off,On;",
@@ -298,7 +308,8 @@ wire        blend     = status[5];
 wire        joyswap   = status[6];
 wire  [1:0] rotate_screen = status[33:32];
 wire        rotate_filter = status[34];
-reg   [1:0] orientation;
+reg   [1:0] orientation;  // TODO
+
 
 // wire            forced_scandoubler; //?
 // wire    [21:0]  gamma_bus;
@@ -440,7 +451,7 @@ wire    [3:0]   vpos_adjust = status[28:25];
 Psychic5_emu gameboard_top (
     .i_EMU_MCLK                 (CLK60M                     ),
     .i_EMU_INITRST              (1'b0                       ),  	// RESET
-    .i_EMU_SOFTRST              (master_reset               ),		// master_reset
+    .i_EMU_SOFTRST              (1'b0		                ),		// master_reset
 
     .o_HSYNC_n                  (hsync_n                    ),
     .o_VSYNC_n                  (vsync_n                    ),
@@ -482,7 +493,7 @@ Psychic5_emu gameboard_top (
     .sdram_ncs                  (SDRAM_nCS                  ),
     .sdram_cke                  (SDRAM_CKE                  ),
 
-`ifdef NEPTUNOPLUS
+`ifdef GX150
     .debug                      (debug                      )
 `else
     .debug                      (LED                        )
@@ -583,7 +594,7 @@ mist_dual_video #(.COLOR_DEPTH(5),.SD_HCNT_WIDTH(10), .OUT_COLOR_DEPTH(VGA_BITS)
 // 	.SDRAM_BA       ( SDRAM2_BA        ),
 // `endif
 	.no_csync(no_csync),
-	.rotate({orientation[1],rotate}),
+	.rotate({orientation[1],rotate}),			// TODO
 	.rotate_screen  ( rotate_screen    ),
 	.rotate_hfilter ( rotate_filter    ),
 	.rotate_vfilter ( rotate_filter    ),
@@ -594,6 +605,41 @@ mist_dual_video #(.COLOR_DEPTH(5),.SD_HCNT_WIDTH(10), .OUT_COLOR_DEPTH(VGA_BITS)
 	.scanlines(scanlines),
 	.ypbpr(ypbpr)
 	);
+
+
+
+// mist_video #(.COLOR_DEPTH(5),.SD_HCNT_WIDTH(10), .OUT_COLOR_DEPTH(VGA_BITS), .USE_BLANKS(1'b1), .BIG_OSD(BIG_OSD)) mist_video(
+// 	.clk_sys(CLK60M),
+// `ifndef NEPTUNOPLUS
+// 	.SPI_SCK(SPI_SCK),
+// `else
+// 	.SPI_SCK( SPI_SS4 ? SPI_SCK : SD_SCK ),
+// `endif		
+// 	.SPI_SS3(SPI_SS3),
+// 	.SPI_DI(SPI_DI),
+// 	.R(video_r),
+// 	.G(video_g),
+// 	.B(video_b),
+// 	.HBlank(~hblank_n),
+// 	.VBlank(~vblank_n),
+// 	.HSync(~hsync_n),
+// 	.VSync(~vsync_n),
+// 	.VGA_R(VGA_R),
+// 	.VGA_G(VGA_G),
+// 	.VGA_B(VGA_B),
+// 	.VGA_VS(VGA_VS),
+// 	.VGA_HS(VGA_HS),
+
+// 	.no_csync(no_csync),
+// 	.rotate(2'b11),
+// 	.ce_divider(4'd9), // pix clock = 60/10
+// 	.blend(blend),
+// 	.scandoubler_disable(1'b0),
+// 	// scanlines (00-none 01-25% 10-50% 11-75%)   	//only works if scandoubler enabled
+// 	.scanlines(scanlines),
+// 	.ypbpr(ypbpr)
+// 	);
+
 
 // `ifdef USE_HDMI
 // i2c_master #(60_000_000) i2c_master (
@@ -616,6 +662,7 @@ mist_dual_video #(.COLOR_DEPTH(5),.SD_HCNT_WIDTH(10), .OUT_COLOR_DEPTH(VGA_BITS)
 // 	assign HDMI_PCLK = CLK60M;
 // `endif
 
+`ifndef POSEIDON
 dac #(16) dacl(
 	.clk_i(CLK60M),
 	.res_n_i(1),
@@ -628,7 +675,8 @@ dac #(16) dacr(
 	.res_n_i(1),
 	.dac_i({~sound[15], sound[14:0]}),
 	.dac_o(AUDIO_R)
-	);
+	);	
+`endif
 
 `ifdef I2S_AUDIO
 i2s i2s (
